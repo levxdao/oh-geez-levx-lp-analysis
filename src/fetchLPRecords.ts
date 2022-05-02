@@ -12,6 +12,8 @@ export interface LPRecord {
 
 export type LPRecords = Record<string, LPRecord[]>;
 
+const MASTER_CHEF = "0xc2EdaD668740f1aA35E4D8f227fB8E17dcA888Cd";
+
 const fetchLPRecords = async (lpToken: string): Promise<LPRecords> => {
   const records: LPRecords = {};
 
@@ -21,12 +23,16 @@ const fetchLPRecords = async (lpToken: string): Promise<LPRecords> => {
     if (to == constants.AddressZero && from == constants.AddressZero) {
       // do nothing
     } else if (to == constants.AddressZero) {
-      addRecord(records, from, true, value, event.blockNumber);
+      if (from != MASTER_CHEF)
+        addRecord(records, from, true, value, event.blockNumber);
     } else if (from == constants.AddressZero) {
-      addRecord(records, to, false, value, event.blockNumber);
+      if (to != MASTER_CHEF)
+        addRecord(records, to, false, value, event.blockNumber);
     } else {
-      addRecord(records, from, true, value, event.blockNumber);
-      addRecord(records, to, false, value, event.blockNumber);
+      if (from != MASTER_CHEF)
+        addRecord(records, from, true, value, event.blockNumber);
+      if (to != MASTER_CHEF)
+        addRecord(records, to, false, value, event.blockNumber);
     }
   });
 
