@@ -18,23 +18,25 @@ const fetchLPRecords = async (lpToken: string): Promise<LPRecords> => {
   const records: LPRecords = {};
 
   const token = new Contract(lpToken, abi, provider) as IERC20;
-  (await token.queryFilter(token.filters.Transfer())).forEach((event) => {
-    const { to, from, value } = event.args;
-    if (to == constants.AddressZero && from == constants.AddressZero) {
-      // do nothing
-    } else if (to == constants.AddressZero) {
-      if (from != MASTER_CHEF)
-        addRecord(records, from, true, value, event.blockNumber);
-    } else if (from == constants.AddressZero) {
-      if (to != MASTER_CHEF)
-        addRecord(records, to, false, value, event.blockNumber);
-    } else {
-      if (from != MASTER_CHEF)
-        addRecord(records, from, true, value, event.blockNumber);
-      if (to != MASTER_CHEF)
-        addRecord(records, to, false, value, event.blockNumber);
+  (await token.queryFilter(token.filters.Transfer(), 0, 14699494)).forEach(
+    (event) => {
+      const { to, from, value } = event.args;
+      if (to == constants.AddressZero && from == constants.AddressZero) {
+        // do nothing
+      } else if (to == constants.AddressZero) {
+        if (from != MASTER_CHEF)
+          addRecord(records, from, true, value, event.blockNumber);
+      } else if (from == constants.AddressZero) {
+        if (to != MASTER_CHEF)
+          addRecord(records, to, false, value, event.blockNumber);
+      } else {
+        if (from != MASTER_CHEF && to != MASTER_CHEF) {
+          addRecord(records, from, true, value, event.blockNumber);
+          addRecord(records, to, false, value, event.blockNumber);
+        }
+      }
     }
-  });
+  );
 
   return records;
 };
